@@ -1,0 +1,4 @@
+
+GET /room/:username controllers.ChatController.showRoom(username)
+GET /room/socket/:username controllers.ChatController.chatSocket(username)
+GET /assets/*file controllers.Assets.at(path="/public", file)
