@@ -1,10 +1,93 @@
-@(title: String)(content: Html)
+@(username: String)(implicit request: RequestHeader)
 <html>
     <head>
-        <title>@title</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>ChatterBox</title>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/simple-sidebar.css")"/>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap-custom.css")"/>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/glyphicon-custom.css")"/>
+        <link rel="stylesheet" href="@routes.Assets.at("lib/bootstrap/css/bootstrap.min.css")"/>
         <script type="text/javascript" src="@routes.Assets.at("lib/jquery/jquery.min.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")"></script>
+        <script type="application/javascript">
+                $(function() {
+                    var ws = new WebSocket("@routes.ChatController.chatSocket(username).webSocketURL()");
+
+                    ws.onmessage = function(msg) {
+                        var response = JSON.parse(msg.data);
+                        if(response.messageType == "broadcast") {
+                            $('#messages').append("<li><span class=\"glyphicon glyphicon-user\"></span>" + "  <b>" + response.username + "</b> says: " + response.message  + "</li>");
+                        } else if (response.messageType == "userJoined") {
+                            $('#onlineUsers').append("<li class=\"" + response.username + "\">" + "<span class=\"glyphicon glyphicon-record green\"></span>" + "  " + response.username + "</li>");
+                        } else if(response.messageType == "listUsers") {
+                            for(var i = 0; i < response.users.length; i++) {
+                                $('#onlineUsers').append("<li class=\"" + response.users[i] + "\">" + "<span class=\"glyphicon glyphicon-record green\"></span>" + "  " + response.users[i] + "</li>");
+                            }
+                        } else if(response.messageType == "userLeft") {
+                            console.log("Removing user" + response.username);
+                            $("." + response.username).remove();
+                        }
+                    };
+
+                    $('#chatform').submit(function() {
+                        ws.send($('#text').val());
+                        $('#text').val("").focus();
+                        return false;
+                    });
+                });
+        </script>
     </head>
     <body>
-        <section class="content">@content</section>
+            <!-- Navigation -->
+        <div id="wrapper">
+                <!-- Sidebar -->
+            <div id="sidebar-wrapper">
+                <ul class="sidebar-nav">
+                    <li id="onlineUsers" class="sidebar-brand">
+                        <span class="glyphicon glyphicon-align-left"></span>  Active Users
+                    </li>
+                </ul>
+            </div>
+                <!-- /#sidebar-wrapper -->
+            <div id="page-content-wrapper">
+                <div class="container-fluid">
+                    <ul class="nav nav-pills">
+                        <li class="active"><a href="#">Message Stream</a></li>
+                        <li><a href="#">History</a></li>
+                        <li><a href="#">Statistics</a></li>
+                        <li><a href="#">Logout</a></li>
+                    </ul>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <h2><span class="glyphicon glyphicon-console"></span>  Global Chat - you are: @username</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-left">
+                        <h2>- Message Stream  <small>for ChatterBox</small></h2>
+                        <ul id="messages"></ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1 text-left">
+                        <form role="form" id="chatform">
+                            <div class="input-group">
+                                <input class="form-control" id="text" placeholder="Enter your message..."/>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-secondary" type="submit">Say</button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
     </body>
 </html>

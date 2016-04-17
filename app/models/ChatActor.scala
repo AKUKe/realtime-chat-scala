@@ -7,10 +7,12 @@ import play.api.Logger
 object ChatActor {
   val chatManager = ActorSystem().actorOf(Props[ChatManager])
 
-  def props(username: String, out: ActorRef) = Props(new ChatActor(username, out, chatManager))
+  def props(username: String, out: ActorRef) =
+    Props(new ChatActor(username, out, chatManager))
 }
 
-class ChatActor(username: String, client: ActorRef, chatManager: ActorRef) extends Actor {
+class ChatActor(username: String, client: ActorRef, chatManager: ActorRef)
+    extends Actor {
 
   override def preStart() = {
     Logger.info(s"$username connected")
