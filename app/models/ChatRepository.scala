@@ -1,6 +1,6 @@
 package models
 
-import models.persistence.BroadcastTableDef
+import models.persistence.BroadcastTable
 import slick.driver.H2Driver.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -8,7 +8,7 @@ import scala.concurrent.Future
 class ChatRepository {
 
   val db = Database.forConfig("h2mem1")
-  val messages = TableQuery[BroadcastTableDef]
+  val messages = TableQuery[BroadcastTable]
 
   val setup = DBIO.seq(
       messages.schema.create
