@@ -21,7 +21,7 @@
                     ws.onmessage = function(msg) {
                         var response = JSON.parse(msg.data);
                         if(response.messageType == "broadcast") {
-                            $('#messages').append("<li><span class=\"glyphicon glyphicon-user\"></span>" + "  <b>" + response.username + "</b> says: " + response.message  + "</li>");
+                            $('#messages').append("<li><span class=\"glyphicon glyphicon-user\"></span>" + "  <b>" + response.username + "</b> " + response.timestamp + " says: " + response.message  + "</li>");
                         } else if (response.messageType == "userJoined") {
                             $('#onlineUsers').append("<li class=\"" + response.username + "\">" + "<span class=\"glyphicon glyphicon-record green\"></span>" + "  " + response.username + "</li>");
                         } else if(response.messageType == "listUsers") {
@@ -29,8 +29,11 @@
                                 $('#onlineUsers').append("<li class=\"" + response.users[i] + "\">" + "<span class=\"glyphicon glyphicon-record green\"></span>" + "  " + response.users[i] + "</li>");
                             }
                         } else if(response.messageType == "userLeft") {
-                            console.log("Removing user" + response.username);
                             $("." + response.username).remove();
+                        } else if(response.messageType == "history") {
+                            for(var i = 0; i < response.history.length; i++) {
+                                $('#chatHistory').append("<li><span class=\"glyphicon glyphicon-user\"></span>  " + response.history[i]  + "</li>");
+                            }
                         }
                     };
 
@@ -38,6 +41,14 @@
                         ws.send($('#text').val());
                         $('#text').val("").focus();
                         return false;
+                    });
+
+                    $('ul.nav.nav-pills li a').click(function(e) {
+                        if(e.target.id == 'history') {
+                            $('#chatHistory').empty();
+                            ws.send('history');
+                        }
+                        return true;
                     });
                 });
         </script>
@@ -49,7 +60,7 @@
             <div id="sidebar-wrapper">
                 <ul class="sidebar-nav">
                     <li id="onlineUsers" class="sidebar-brand">
-                        <span class="glyphicon glyphicon-align-left"></span>  Active Users
+                        <span class="glyphicon glyphicon-align-left"></span> Active Users
                     </li>
                 </ul>
             </div>
@@ -57,37 +68,52 @@
             <div id="page-content-wrapper">
                 <div class="container-fluid">
                     <ul class="nav nav-pills">
-                        <li class="active"><a href="#">Message Stream</a></li>
-                        <li><a href="#">History</a></li>
-                        <li><a href="#">Statistics</a></li>
-                        <li><a href="#">Logout</a></li>
+                        <li class="active"><a id="messageStream" data-toggle="pill" href="#messageStreamTab">Message Stream</a></li>
+                        <li><a id="history" data-toggle="pill" href="#historyTab">History</a></li>
+                        <li><a id="logout" href="http://localhost:9000">Logout</a></li>
                     </ul>
                 </div>
-                <div class="row">
-                    <div class="col-lg-12 text-center">
-                        <h2><span class="glyphicon glyphicon-console"></span>  Global Chat - you are: @username</h2>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 text-left">
-                        <h2>- Message Stream  <small>for ChatterBox</small></h2>
-                        <ul id="messages"></ul>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-10 col-md-offset-1 text-left">
-                        <form role="form" id="chatform">
-                            <div class="input-group">
-                                <input class="form-control" id="text" placeholder="Enter your message..."/>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-secondary" type="submit">Say</button>
-                                </span>
+                <div class="tab-content">
+                    <div id="messageStreamTab" class="tab-pane fade in active">
+                        <div class="row">
+                            <div class="col-lg-12 text-center">
+                                <h2><span class="glyphicon glyphicon-console"></span> Global Chat - you are: @username</h2>
                             </div>
-                        </form>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-left">
+                                <h2>- Message Stream <small>for ChatterBox</small></h2>
+                                <ul id="messages"></ul>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-10 col-md-offset-1 text-left">
+                                <form role="form" id="chatform">
+                                    <div class="input-group">
+                                        <input class="form-control" id="text" placeholder="Enter your message..."/>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-secondary" type="submit">Say</button>
+                                        </span>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="historyTab" class="tab-pane fade">
+                        <div class="row">
+                            <div class="col-lg-12 text-center">
+                                <h2><span class="glyphicon glyphicon-time"></span> Global Chat History</h2>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-left">
+                                <h2>- Chat History <small>for ChatterBox</small></h2>
+                                <ul id="chatHistory"></ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </body>
 </html>

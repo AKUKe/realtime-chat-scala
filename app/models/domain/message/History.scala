@@ -1,5 +1,7 @@
 package models.domain.message
 
-case class History() {
+import akka.actor.ActorRef
+
+case class History(actor: ActorRef) {
 
 }

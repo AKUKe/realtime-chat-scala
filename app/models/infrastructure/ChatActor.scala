@@ -1,7 +1,7 @@
-package models
+package models.infrastructure
 
-import akka.actor.{ActorSystem, Props, ActorRef, Actor}
-import models.domain.message.{Leave, Broadcast, Join}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import models.domain.message.{Broadcast, History, Join, Leave}
 import play.api.Logger
 
 object ChatActor {
@@ -12,7 +12,7 @@ object ChatActor {
 }
 
 class ChatActor(username: String, client: ActorRef, chatManager: ActorRef)
-    extends Actor {
+  extends Actor {
 
   override def preStart() = {
     Logger.info(s"$username connected")
@@ -26,6 +26,11 @@ class ChatActor(username: String, client: ActorRef, chatManager: ActorRef)
 
   def receive = {
     case message: String =>
-      chatManager ! Broadcast(username, message)
+      if (message.equals("history")) chatManager ! History(client)
+      else {
+        val time = java.time.LocalDateTime.now()
+        chatManager ! Broadcast(username, message, time.getHour + ":" +
+          time.getMinute + ":" + time.getSecond)
+      }
   }
 }
