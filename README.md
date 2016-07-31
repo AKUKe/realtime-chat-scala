@@ -1,4 +1,4 @@
-# RealTimeChatScala
+# realtime-chat-scala
 
 RealTimeChatScala is a simple chat application that allows users to communicate using websockets in real time. Presently it only supports global chat and uses an in-memory H2 databse to track chat history.
 
